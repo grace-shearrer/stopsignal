@@ -17,9 +17,10 @@ library(psych)
 
 
 
-data<-read.table("~/Google Drive/stopsignal/Export_from_BevBits/4test-test-test-2-1.csv",
+data<-read.table("~/Google Drive/stopsignal/Export_from_BevBits/h-h-h-1-5.csv",
                  sep=",",
                  header=T)
+head(data)
 data$type[data$trialType == 0]<-"Left Go"
 data$type[data$trialType == 1]<-"Right Go"
 data$type[data$trialType == 2]<-"Left Stop"
@@ -39,6 +40,8 @@ dfList<-list(R1, R2,R3)
 lapply(dfList, function(x){
   sum_userRe<-summary(as.factor(x$userResult))
   inhibition<-tail(sum_userRe, n=1)
+  correctGos<-sum_userRe[3]
+  
   
   sum_stops<-summary(as.factor(x$stopgo))
   stops<-sum_stops[2]
@@ -49,14 +52,15 @@ lapply(dfList, function(x){
   
   per_stop_fail<-1-perStopSuccess
   per_stop_fail
-  
-  index<-round(gos*per_stop_fail)
+  #only correct go trials
+  index<-round(correctGos*per_stop_fail)
   index
   
   go_trials<-subset(x, stopgo=="Go")
   go_trials[order(go_trials$reactionTime),] 
-  
-  goRT<-go_trials$reactionTime[index]
+  go_go<-go_trials$reactionTime[go_trials$reactionTime > -1]
+  neat<-sort(go_go)
+  goRT<-neat[index]
   goRT
   
   
@@ -66,6 +70,6 @@ lapply(dfList, function(x){
   
   SSRT<-goRT-SSD
   SSRT
-  return(list(SSRT,SSD,goRT,index,per_stop_fail,stops))
+  return(list(SSRT,SSD,goRT,index,per_stop_fail,stops,inhibition,neat))
 })
 
